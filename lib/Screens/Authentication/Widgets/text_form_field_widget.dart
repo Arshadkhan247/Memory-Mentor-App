@@ -35,11 +35,6 @@ class TextFormFieldWidget extends StatelessWidget {
           ),
         ),
         suffixIcon: suffixIcon,
-        // Icon(
-        //   formIcon,
-        //   size: 25,
-        //   color: colorConditionVariable ? Colors.green : Colors.grey,
-        // ),
         label: Text(
           fieldName,
           style: const TextStyle(

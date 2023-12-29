@@ -1,10 +1,12 @@
 // ignore_for_file: file_names
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mentor/Screens/Authentication/Screens/login_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
+import 'package:mentor/Screens/DashBoard/dashboard_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -15,12 +17,13 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  String? _userType;
+  String userRole = '';
   bool _isLoading = false;
 
   // code for Register a user and their data validation..
@@ -33,11 +36,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Validate the input fields
       _validateFields();
 
+      // Getting Current user from firebase.
+      User? user = _auth.currentUser;
       // Create a new user in Firebase Authentication......
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+      await _auth
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          )
+          .then((value) => {
+                postDetailsToFirestore(
+                    _nameController.text,
+                    _emailController.text,
+                    userRole,
+                    user!
+                        .uid) //  _auth.currentUser!.uid :--uid can also work like this.
+              });
 
       setState(() {
         // Clear text fields
@@ -62,22 +76,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _isLoading = false;
       });
 
-      if (e.code == 'weak-password') {
-        _showErrorDialog('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        _showErrorDialog('Account already exists for this email.');
-      } else {
-        _showErrorDialog('${e.message}');
+      String errorMessage = 'An error occurred while registering.';
+
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists for this email.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        default:
+          errorMessage = e.message ?? errorMessage;
       }
+
+      _showErrorDialog(errorMessage);
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
 
-      _showErrorDialog(
-        '$e',
-      );
+      _showErrorDialog('An unexpected error occurred: $e');
     }
+  }
+
+  postDetailsToFirestore(
+    String userName,
+    String email,
+    String role,
+    String userId,
+  ) async {
+    var user = _auth.currentUser;
+    CollectionReference ref = FirebaseFirestore.instance.collection('users');
+    ref.doc(user!.uid).set({
+      'userName': userName,
+      'email': _emailController.text,
+      'role': role,
+      'userId': userId,
+    });
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (context) => const DashbaordScreen()));
   }
 
 // this function is used to display success Message to user.
@@ -95,7 +135,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
+        _confirmPasswordController.text.isEmpty ||
+        userRole.isEmpty) {
       throw Exception('Please fill in all the required fields.');
     }
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -103,6 +144,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+// used to show Error in dialogu box to user
+  ///
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -129,7 +172,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   // this function is used to validate Your Email on the bases of Given Pattran.
   bool _isValidEmail(String email) {
-    String pattern = r'^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$';
+    String pattern = r'^[\w-]+(\.[\w-]+)*@gmail\.com$';
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(email);
   }
@@ -307,10 +350,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           children: [
                             Radio(
                               value: 'caregiver',
-                              groupValue: _userType,
+                              groupValue: userRole,
                               onChanged: (value) {
                                 setState(() {
-                                  _userType = value.toString();
+                                  userRole = value.toString();
                                 });
                               },
                               activeColor: const Color(0xFF6789CA),
@@ -324,10 +367,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             Radio(
                               value: 'patient',
-                              groupValue: _userType,
+                              groupValue: userRole,
                               onChanged: (value) {
                                 setState(() {
-                                  _userType = value.toString();
+                                  userRole = value.toString();
                                 });
                               },
                               activeColor: const Color(0xFF6789CA),
