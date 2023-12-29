@@ -46,12 +46,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _passwordController.clear();
         _confirmPasswordController.clear();
 
-        // After User Registration Icons variables will become false. Will show in Grey color.
+        // After User Registration Icons  variables will become false. Will show in Grey color.
         isPasswordVisible = false;
         _isNameFilled = false;
         _isValidEmailAddress = false;
         _isPasswordMatch = false;
-
         _isLoading = false;
       });
 
@@ -138,8 +137,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Variables
   late bool isPasswordVisible = false;
   bool _isNameFilled = false;
-  bool isEmailFilled = false;
-  bool _isValidEmailAddress = false;
+  bool isEmailFilled =
+      false; // this is used to check that either user has enter their email or not,.
+  bool _isValidEmailAddress =
+      false; // this variable is used to match user email with predefine pattran.
   bool _isPasswordMatch = false;
 
 // the Main Body is starting from here ...
@@ -282,15 +283,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           onChanged: (value) {
-                            setState(() {
-                              // Compare password and confirm password
-                              if (_confirmPasswordController.text ==
-                                  _passwordController.text) {
-                                _isPasswordMatch = true;
-                              } else {
-                                _isPasswordMatch = false;
-                              }
-                            });
+                            setState(
+                              () {
+                                // Compare password and confirm password
+                                if (_confirmPasswordController.text ==
+                                    _passwordController.text) {
+                                  _isPasswordMatch = true;
+                                } else {
+                                  _isPasswordMatch = false;
+                                }
+                              },
+                            );
                           },
                         ),
 
@@ -358,6 +361,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     child: Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: LoadingIndicator(
+                                        // this is package to show loading indicator when submitt is loading.
                                         indicatorType: Indicator.lineScale,
                                         colors: [Colors.white],
                                         strokeWidth: 0.5,
@@ -403,7 +407,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  color: Colors.black,
+                                  color: Color(0xFF6789CA),
                                 ),
                               ),
                             ),

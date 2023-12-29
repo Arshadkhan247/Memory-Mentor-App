@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
+import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
 import 'package:mentor/Screens/DashBoard/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,7 +11,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   String? userType;
+
+  late bool isPasswordVisible = false;
+  bool isEmailFilled =
+      false; // this is used to check that either user has enter their email or not,.
+  bool _isValidEmailAddress =
+      false; // this variable is used to match user email with predefine pattran.
+
+  // this function is used to validate Your Email on the bases of Given Pattran.
+  bool _isValidEmail(String email) {
+    String pattern = r'^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -26,8 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(colors: [
-                  // Color(0xffB81736),
-                  // Color(0xff281537),
                   Color(0xFF6789CA),
                   Color(0xff281537),
                 ]),
@@ -62,20 +77,36 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextFormField(
-                          decoration: const InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.check,
-                                color: Colors.grey,
-                              ),
-                              label: Text(
-                                'Gmail',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    // color: Color(0xffB81736),
-                                    color: Color(0xFF345FB4)),
-                              )),
-                        ),
+                        TextFormFieldWidget(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            onChanged: (value) {
+                              setState(() {
+                                isEmailFilled = value.isNotEmpty;
+                                _isValidEmailAddress =
+                                    _isValidEmail(_emailController.text);
+                              });
+                            },
+                            suffixIcon: Icon(Icons.check,
+                                color: _isValidEmailAddress
+                                    ? Colors.green
+                                    : Colors.grey),
+                            fieldName: 'Email',
+                            obscureText: false),
+                        // TextFormField(
+                        //   decoration: const InputDecoration(
+                        //       suffixIcon: Icon(
+                        //         Icons.check,
+                        //         color: Colors.grey,
+                        //       ),
+                        //       label: Text(
+                        //         'Gmail',
+                        //         style: TextStyle(
+                        //             fontWeight: FontWeight.bold,
+                        //             // color: Color(0xffB81736),
+                        //             color: Color(0xFF345FB4)),
+                        //       )),
+                        // ),
                         TextFormField(
                           decoration: const InputDecoration(
                               suffixIcon: Icon(
@@ -139,9 +170,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              color: Color(0xff281537),
+                              fontWeight: FontWeight.normal,
+                              fontSize: 12,
+                              color: Color(0xFF6789CA),
                             ),
                           ),
                         ),
@@ -179,38 +210,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(
                           height: 30,
                         ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Don't have account? ",
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Don't have account? ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const SignUpScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Sign up",
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignUpScreen(),
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  "Sign up",
-                                  style: TextStyle(
 
-                                      ///done login page
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17,
-                                      color: Colors.black),
-                                ),
+                                    ///done login page
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                    color: Color(0xFF6789CA)),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         )
                       ],
                     ),
