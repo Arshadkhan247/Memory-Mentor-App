@@ -111,10 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return AlertDialog(
           elevation: 20,
           title: const Text('Error Found!'),
-          content: Text(
-            message,
-            style: const TextStyle(),
-          ),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
@@ -144,6 +141,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isEmailFilled = false;
   bool _isValidEmailAddress = false;
   bool _isPasswordMatch = false;
+
+// the Main Body is starting from here ...
 
   @override
   Widget build(BuildContext context) {
@@ -261,13 +260,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           keyboardType: TextInputType.visiblePassword,
                           decoration: InputDecoration(
                             suffixIcon: Icon(
-                                size: 25,
-                                Icons.check,
-                                color: _isPasswordMatch
-                                    ? Colors.green
-                                    : Colors
-                                        .grey // You can customize the color for empty input
-                                ),
+                              Icons.check,
+                              size: 25,
+                              color: !_isPasswordMatch ||
+                                      _confirmPasswordController.text.isEmpty
+                                  ? Colors.grey
+                                  : Colors.green,
+                            ),
                             focusedBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(
                                 color: Color(0xFF6789CA),
@@ -287,11 +286,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               // Compare password and confirm password
                               if (_confirmPasswordController.text ==
                                   _passwordController.text) {
-                                _isPasswordMatch =
-                                    true; // Set to true if passwords match
+                                _isPasswordMatch = true;
                               } else {
-                                _isPasswordMatch =
-                                    false; // Set to false if passwords don't match
+                                _isPasswordMatch = false;
                               }
                             });
                           },
