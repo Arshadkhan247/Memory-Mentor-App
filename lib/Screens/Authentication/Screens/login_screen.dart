@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mentor/Screens/Authentication/Screens/forgot_password_screen.dart';
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
 import 'package:mentor/Screens/DashBoard/dashboard_screen.dart';
@@ -11,21 +14,159 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? userType;
+  String userRole = '';
+  bool _isLoading = false;
 
+//  Variable that are required inside, for UI Logic.
   late bool isPasswordVisible = false;
-  bool isEmailFilled =
-      false; // this is used to check that either user has enter their email or not,.
-  bool _isValidEmailAddress =
-      false; // this variable is used to match user email with predefine pattran.
+  bool isEmailFilled = false;
+  bool _isValidEmailAddress = false;
+
+  Future<void> login() async {
+    try {
+      setState(() {
+        _isLoading = true; // when getting logic
+      });
+
+      _validateFields(); // Validate All the field before going to login.
+
+      // Login current user present in Firebase .
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      // Check the user's role
+      bool isRoleMatched = await checkUserRole();
+
+      if (isRoleMatched) {
+        // Navigate to the dashboard if the role matches
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashbaordScreen()),
+        );
+      } else {
+        // Show an error message if the role does not match
+        _showErrorDialog('No user found with the specified role.');
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      setState(() {
+        // Clear text fields
+        _emailController.clear();
+        _passwordController.clear();
+        // After User Registration Icons  variables will become false. Will show in Grey color.
+        isPasswordVisible = false;
+        _isValidEmailAddress = false;
+        _isLoading = false;
+      });
+
+      showSuccessSnackbar(); // this function will call when a user succesfully login from firebase.
+
+      print('User signed in successfully.');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      String errorMessage = 'An error occurred while logging in.';
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found for this email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Invalid password.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user account has been disabled.';
+          break;
+        default:
+          errorMessage = e.message ?? errorMessage;
+      }
+
+      _showErrorDialog(errorMessage);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showErrorDialog('An unexpected error occurred: $e');
+    }
+  }
 
   // this function is used to validate Your Email on the bases of Given Pattran.
   bool _isValidEmail(String email) {
-    String pattern = r'^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$';
+    String pattern = r'^[\w-]+(\.[\w-]+)*@gmail\.com$';
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(email);
+  }
+
+  // this will ensure that all the field are filled.
+  void _validateFields() {
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        userRole.isEmpty) {
+      throw Exception('Please fill in all the required fields.');
+    }
+  }
+
+// this function is used to check the role of a user against their email.
+  Future<bool> checkUserRole() async {
+    var user = _auth.currentUser;
+    CollectionReference ref = FirebaseFirestore.instance.collection('users');
+    var snapshot = await ref.doc(user!.uid).get();
+
+    if (snapshot.exists) {
+      // Check if the role matches
+      return snapshot['role'] == userRole;
+    } else {
+      return false;
+    }
+  }
+  // this function is used to display success Message to user.
+
+  void showSuccessSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account login successfully!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  // used to show Error in dialogu box to user
+  ///
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          elevation: 20,
+          title: const Text('Error Found!'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF345FB4)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -93,34 +234,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : Colors.grey),
                             fieldName: 'Email',
                             obscureText: false),
-                        // TextFormField(
-                        //   decoration: const InputDecoration(
-                        //       suffixIcon: Icon(
-                        //         Icons.check,
-                        //         color: Colors.grey,
-                        //       ),
-                        //       label: Text(
-                        //         'Gmail',
-                        //         style: TextStyle(
-                        //             fontWeight: FontWeight.bold,
-                        //             // color: Color(0xffB81736),
-                        //             color: Color(0xFF345FB4)),
-                        //       )),
-                        // ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.visibility_off,
-                                color: Colors.grey,
+                        TextFormFieldWidget(
+                            controller: _passwordController,
+                            keyboardType: TextInputType.visiblePassword,
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isPasswordVisible = !isPasswordVisible;
+                                });
+                              },
+                              icon: Icon(
+                                size: 25,
+                                isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: isPasswordVisible
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
-                              label: Text(
-                                'Password',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    // color: Color(0xffB81736),
-                                    color: Color(0xFF345FB4)),
-                              )),
-                        ),
+                            ),
+                            fieldName: "Password",
+                            obscureText: !isPasswordVisible),
                         const SizedBox(
                           height: 10,
                         ),
@@ -129,10 +263,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Radio(
                                 value: 'caregiver',
-                                groupValue: userType,
+                                groupValue: userRole,
                                 onChanged: (value) {
                                   setState(() {
-                                    userType = value.toString();
+                                    userRole = value.toString();
                                   });
                                 },
                                 activeColor: const Color(0xFF6789CA)),
@@ -145,10 +279,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Radio(
                               value: 'patient',
-                              groupValue: userType,
+                              groupValue: userRole,
                               onChanged: (value) {
                                 setState(() {
-                                  userType = value.toString();
+                                  userRole = value.toString();
                                 });
                               },
                               activeColor: const Color(0xFF6789CA),
@@ -165,14 +299,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(
                           height: 15,
                         ),
-                        const Align(
+                        Align(
                           alignment: Alignment.centerRight,
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 12,
-                              color: Color(0xFF6789CA),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 12,
+                                color: Color(0xFF6789CA),
+                              ),
                             ),
                           ),
                         ),
@@ -180,10 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 30,
                         ),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const DashbaordScreen()));
-                          },
+                          onTap: login,
                           child: Container(
                             height: 55,
                             width: 300,
