@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mentor/Screens/Authentication/Screens/login_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/DashBoard/dashboard_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -102,6 +101,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+// this function help to store the users data into firebase firestore, this will required four values here.
   postDetailsToFirestore(
     String userName,
     String email,
@@ -116,8 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'role': role,
       'userId': userId,
     });
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const DashbaordScreen()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const LoginScreen()));
   }
 
 // this function is used to display success Message to user.
