@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -34,10 +36,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       // Send a password reset email
       await _auth.sendPasswordResetEmail(email: _emailController.text);
 
-      Navigator.push
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
 
       // Show a success message or navigate to a success screen
-      showSuccessDialog();
+      _showSuccessDialog();
     } on FirebaseAuthException catch (e) {
       setState(() {
         _isLoading = false;
