@@ -1,10 +1,14 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mentor/Screens/Authentication/Screens/forgot_password_screen.dart';
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/DashBoard/dashboard_screen.dart';
+import 'package:mentor/Screens/DashBoard/caregiver_dashboard/dashboard_screen.dart';
+import 'package:mentor/Screens/DashBoard/user_dashboard/user_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -43,10 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (isRoleMatched) {
         // Navigate to the dashboard if the role matches
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashbaordScreen()),
-        );
+        if (userRole == 'caregiver') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const CaregiverDashboardScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UserDashboard()),
+          );
+        }
       } else {
         // Show an error message if the role does not match
         _showErrorDialog('No user found with the specified role.');
@@ -67,8 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       showSuccessSnackbar(); // this function will call when a user succesfully login from firebase.
-
-      print('User signed in successfully.');
     } on FirebaseAuthException catch (e) {
       setState(() {
         _isLoading = false;
@@ -338,15 +348,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Color(0xff281537),
                               ]),
                             ),
-                            child: const Center(
-                              child: Text(
-                                'SIGN IN',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.white),
-                              ),
-                            ),
+                            child: _isLoading
+                                ? const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: LoadingIndicator(
+                                        // this is package to show loading indicator when submitt is loading.
+                                        indicatorType: Indicator.lineScale,
+                                        colors: [Colors.white],
+                                        strokeWidth: 0.5,
+                                        backgroundColor: Colors.transparent,
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Text(
+                                      'SIGN IN',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Colors.white),
+                                    ),
+                                  ),
                           ),
                         ),
                         const SizedBox(
