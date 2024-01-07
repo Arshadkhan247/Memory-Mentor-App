@@ -8,6 +8,7 @@ import 'package:mentor/Screens/Authentication/Screens/forgot_password_screen.dar
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
 import 'package:mentor/Screens/DashBoard/caregiver_dashboard/dashboard_screen.dart';
+import 'package:mentor/Screens/DashBoard/user_dashboard/caregiver_relationship_screen.dart';
 import 'package:mentor/Screens/DashBoard/user_dashboard/user_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -56,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const UserDashboard()),
+            MaterialPageRoute(
+                builder: (context) => const CaregiverRelationScreen()),
           );
         }
       } else {

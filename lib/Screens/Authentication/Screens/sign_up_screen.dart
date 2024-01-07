@@ -38,6 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _validateFields();
       // Get the unique ID (uid) assigned by Firebase Authentication
       String caregiverId = generateCaregiverId();
+      String userUID = generateUserUID();
       // Getting Current user from firebase.
       User? user = _auth.currentUser;
       // Create a new user in Firebase Authentication......
@@ -51,7 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     _nameController.text,
                     _emailController.text,
                     userRole,
-                    caregiverId) //  _auth.currentUser!.uid :--uid can also work like this.
+                    userUID) //  _auth.currentUser!.uid :--uid can also work like this.
               });
 
       setState(() {
@@ -178,6 +179,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String caregiverId = (Random().nextInt(900) + 100).toString();
 
     return caregiverId;
+  }
+
+  // Function to generate a random 2 to 4 letter UID
+  String generateUserUID() {
+    // Generate a random 2 to 4 letter UID
+    String userUID = (Random().nextInt(900) + 100).toString();
+    return userUID;
   }
 
   // this function is used to validate Your Email on the bases of Given Pattran.
