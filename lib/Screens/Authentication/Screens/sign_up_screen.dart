@@ -1,5 +1,7 @@
 // ignore_for_file: file_names
 
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String userRole = '';
   bool _isLoading = false;
 
-  // code for Register a user and their data validation..
+  // code for Register a user in firebase and their data validation..
   Future<void> _register() async {
     try {
       setState(() {
@@ -34,7 +36,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       // Validate the input fields
       _validateFields();
-
+      // Get the unique ID (uid) assigned by Firebase Authentication
+      String caregiverId = generateCaregiverId();
       // Getting Current user from firebase.
       User? user = _auth.currentUser;
       // Create a new user in Firebase Authentication......
@@ -48,8 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     _nameController.text,
                     _emailController.text,
                     userRole,
-                    user!
-                        .uid) //  _auth.currentUser!.uid :--uid can also work like this.
+                    caregiverId) //  _auth.currentUser!.uid :--uid can also work like this.
               });
 
       setState(() {
@@ -168,6 +170,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       },
     );
+  }
+
+// this function will work for generating a unique id for caregiver to register for the first time.
+  String generateCaregiverId() {
+    // Generate a random 2 to 4 digit number
+    String caregiverId = (Random().nextInt(900) + 100).toString();
+
+    return caregiverId;
   }
 
   // this function is used to validate Your Email on the bases of Given Pattran.
