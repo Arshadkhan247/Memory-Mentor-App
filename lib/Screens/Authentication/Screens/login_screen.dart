@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,9 +7,9 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mentor/Screens/Authentication/Screens/forgot_password_screen.dart';
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/DashBoard/caregiver_dashboard/dashboard_screen.dart';
-import 'package:mentor/Screens/DashBoard/user_dashboard/caregiver_relationship_screen.dart';
-import 'package:mentor/Screens/DashBoard/user_dashboard/user_dashboard.dart';
+
+import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/caregiver_relationship_screen.dart';
+import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String userRole = '';
   bool _isLoading = false;
 
-//  Variable that are required inside, for UI Logic.
+  //  Variable that are required inside, for UI Logic.
   late bool isPasswordVisible = false;
   bool isEmailFilled = false;
   bool _isValidEmailAddress = false;
@@ -38,11 +38,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       _validateFields(); // Validate All the field before going to login.
 
-      // Login current user present in Firebase .
+      // Login current user present in Firebase.
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
+
       // Check the user's role
       bool isRoleMatched = await checkUserRole();
 
@@ -52,13 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => const CaregiverDashboardScreen()),
+              builder: (context) => const CaregiverHomeScreen(),
+            ),
           );
         } else {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => const CaregiverRelationScreen()),
+              builder: (context) => const CaregiverRelationScreen(),
+            ),
           );
         }
       } else {
@@ -66,22 +69,20 @@ class _LoginScreenState extends State<LoginScreen> {
         _showErrorDialog('No user found with the specified role.');
       }
 
-      setState(() {
-        _isLoading = false;
-      });
+      // Clear text fields
+      _emailController.clear();
+      _passwordController.clear();
 
+      // Reset state variables
       setState(() {
-        // Clear text fields
-        _emailController.clear();
-        _passwordController.clear();
-        // After User Registration Icons  variables will become false. Will show in Grey color.
         isPasswordVisible = false;
         _isValidEmailAddress = false;
         _isLoading = false;
       });
 
-      showSuccessSnackbar(); // this function will call when a user succesfully login from firebase.
+      showSuccessSnackbar(); // Show success message to the user.
     } on FirebaseAuthException catch (e) {
+      // Handle Firebase authentication exceptions
       setState(() {
         _isLoading = false;
       });
@@ -131,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-// this function is used to check the role of a user against their email.
+  // this function is used to check the role of a user against their email.
   Future<bool> checkUserRole() async {
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
@@ -139,13 +140,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (snapshot.exists) {
       // Check if the role matches
-      return snapshot['role'] == userRole;
+      String userRoleFromFirestore = snapshot['role'];
+      if (userRoleFromFirestore == userRole) {
+        return true;
+      } else {
+        print('User role does not match: $userRoleFromFirestore');
+        return false;
+      }
     } else {
+      print('User document not found in Firestore');
       return false;
     }
   }
-  // this function is used to display success Message to user.
 
+  // this function is used to display success Message to user.
   void showSuccessSnackbar() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -155,8 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // used to show Error in dialogu box to user
-  ///
+  // used to show Error in dialogu box to user.
   void _showErrorDialog(String message) {
     showDialog(
       context: context,

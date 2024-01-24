@@ -1,9 +1,12 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/DashBoard/user_dashboard/user_dashboard.dart';
+import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_home_screen.dart';
+import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/user_dashboard.dart';
 
 class CaregiverRelationScreen extends StatefulWidget {
   const CaregiverRelationScreen({Key? key}) : super(key: key);
@@ -21,45 +24,43 @@ class _CaregiverRelationScreenState extends State<CaregiverRelationScreen> {
   bool isEmailFilled = false;
   bool _isValidCaregiverID = false;
 
-  // Create an instance of the RelationshipService class
   final RelationshipService _relationshipService = RelationshipService();
 
-  // Function to validate Caregiver ID
   bool validateCaregiverId(String caregiverId) {
     RegExp caregiverIdRegex = RegExp(r'^\d{2,4}$');
     return caregiverIdRegex.hasMatch(caregiverId);
   }
 
-  // Function to handle the verification button tap
   Future<void> verifyCaregiver() async {
     if (_isValidCaregiverID) {
-      // Replace 'patientId' with the actual patient ID (you need to obtain it from somewhere)
-      String patientId =
-          _auth.currentUser!.uid; // Replace this with the actual patient ID
+      String patientId = _auth.currentUser!.uid;
 
-      // Call the function to check if the caregiver ID is valid
       bool isValidCaregiver = await _relationshipService
           .isValidCaregiverId(_caregiverIdController.text);
 
       if (isValidCaregiver) {
-        // If the caregiver ID is valid, create a relationship
         await _relationshipService.createRelationship(
             _caregiverIdController.text, patientId);
 
-        print('Relationship created successfully!');
-        // Add navigation logic or show a success message
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const UserDashboard(),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You are now in relation with the caregiver'),
+            duration: Duration(seconds: 3),
           ),
         );
+
+        Future.delayed(const Duration(seconds: 3), () {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const PatientHomeScreen(),
+            ),
+          );
+        });
       } else {
-        // Handle the case where the caregiver ID is not valid
         print('Invalid caregiver ID. Please enter a valid ID.');
         // Add logic to show an error message to the user
       }
     } else {
-      // Handle the case where the caregiver ID is not valid
       print('Invalid caregiver ID. Please enter a valid ID.');
       // Add logic to show an error message to the user
     }
@@ -190,38 +191,30 @@ class _CaregiverRelationScreenState extends State<CaregiverRelationScreen> {
 class RelationshipService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Function to check if the entered caregiver ID exists in Firestore
   Future<bool> isValidCaregiverId(String caregiverId) async {
     try {
-      // Get the document associated with the caregiver ID
       FirebaseAuth auth = FirebaseAuth.instance;
       String user = auth.currentUser!.uid;
       DocumentSnapshot caregiverDoc =
           await _firestore.collection('users').doc(user).get();
 
-      // Check if the document exists (meaning the caregiver ID is valid)
       return caregiverDoc.exists;
     } catch (e) {
       print('Error checking caregiver ID: $e');
-      // Return false in case of an error (consider handling errors more gracefully)
       return false;
     }
   }
 
-  // Function to create a relationship between caregiver and patient
   Future<void> createRelationship(String caregiverId, String patientId) async {
     try {
-      // Create a new document in the relationships collection
       await _firestore.collection('relationships').add({
         'caregiverId': caregiverId,
         'patientId': patientId,
-        // You can add more fields here if needed
       });
 
       print('Relationship created successfully!');
     } catch (e) {
       print('Error creating relationship: $e');
-      // Handle the error as needed
     }
   }
 }

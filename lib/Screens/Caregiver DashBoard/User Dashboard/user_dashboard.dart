@@ -16,7 +16,6 @@ class _UserDashboardState extends State<UserDashboard> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   late User _user;
-
   @override
   void initState() {
     super.initState();

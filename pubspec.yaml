@@ -40,6 +40,16 @@ dependencies:
   cloud_firestore: ^4.13.6
   loading_indicator: ^3.1.1
   loading_gifs: ^0.3.0
+  curved_navigation_bar: ^1.0.3
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  firebase_database: ^10.4.0
+  image_picker: ^1.0.7
+  firebase_messaging: ^14.7.10
+  firebase_storage: ^11.6.0
+  google_fonts: ^6.1.0
+  google_maps_flutter: ^2.5.3
+
   
 
 
