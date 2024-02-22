@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/helper/text_styling.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/widgets/reusable_reminder_widget.dart';
+import 'package:mentor/Screens/User%20Dashboard/helper/text_styling.dart';
+import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_reminder_widget.dart';
 
 class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});

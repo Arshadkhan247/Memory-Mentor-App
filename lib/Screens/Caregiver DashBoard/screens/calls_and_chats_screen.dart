@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/helper/text_styling.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/widgets/Reusable_chats_container.dart';
+import 'package:mentor/Screens/User%20Dashboard/helper/text_styling.dart';
+import 'package:mentor/Screens/User%20Dashboard/widgets/Reusable_chats_container.dart';
 
 class CaregiverCallsAndChatsScreen extends StatefulWidget {
   const CaregiverCallsAndChatsScreen({super.key});

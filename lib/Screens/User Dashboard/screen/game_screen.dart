@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/widgets/reusable_button.dart';
+import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_button.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/helper/text_styling.dart';
+import 'package:mentor/Screens/User%20Dashboard/helper/text_styling.dart';
 
 class ReusableReminderWidget extends StatelessWidget {
   const ReusableReminderWidget({super.key});

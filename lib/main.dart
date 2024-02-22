@@ -3,17 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mentor/Database/firebase_options.dart';
 import 'package:mentor/Screens/Authentication/Screens/welcomeScreen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/caregiver_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/game_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_current_location_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_home_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/reminder_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_home_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/check_game_result_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/get_patient_location_screen.dart';
-import 'package:mentor/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

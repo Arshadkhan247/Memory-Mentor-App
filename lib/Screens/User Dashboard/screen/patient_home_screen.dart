@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/caregiver_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_current_location_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/game_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/reminder_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/widgets/reusable_button.dart';
+import 'package:mentor/Screens/User%20Dashboard/screen/caregiver_calls_and_chats_screen.dart';
+import 'package:mentor/Screens/User%20Dashboard/screen/patient_current_location_screen.dart';
+import 'package:mentor/Screens/User%20Dashboard/screen/game_screen.dart';
+import 'package:mentor/Screens/User%20Dashboard/screen/reminder_screen.dart';
+import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_button.dart';
 
 class PatientHomeScreen extends StatefulWidget {
   const PatientHomeScreen({super.key});

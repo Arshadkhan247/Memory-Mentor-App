@@ -5,8 +5,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_home_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/user_dashboard.dart';
+import 'package:mentor/Screens/User%20Dashboard/screen/patient_home_screen.dart';
 
 class CaregiverRelationScreen extends StatefulWidget {
   const CaregiverRelationScreen({Key? key}) : super(key: key);
@@ -195,6 +194,8 @@ class RelationshipService {
     try {
       FirebaseAuth auth = FirebaseAuth.instance;
       String user = auth.currentUser!.uid;
+
+      print(user.toString());
       DocumentSnapshot caregiverDoc =
           await _firestore.collection('users').doc(user).get();
 
@@ -207,8 +208,8 @@ class RelationshipService {
 
   Future<void> createRelationship(String caregiverId, String patientId) async {
     try {
-      await _firestore.collection('relationships').add({
-        'caregiverId': caregiverId,
+      // Use caregiverId as the document name
+      await _firestore.collection('relationships').doc(caregiverId).set({
         'patientId': patientId,
       });
 

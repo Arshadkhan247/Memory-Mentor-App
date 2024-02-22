@@ -1,287 +1,137 @@
-// ignore_for_file: library_private_types_in_public_api
-
-import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/helper/text_styling.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class GetPatientLocationScreen extends StatefulWidget {
-  const GetPatientLocationScreen({Key? key}) : super(key: key);
+class Get extends StatefulWidget {
+  const Get({Key? key}) : super(key: key);
 
   @override
-  _GetPatientLocationScreenState createState() =>
-      _GetPatientLocationScreenState();
+  _GetState createState() => _GetState();
 }
 
-class _GetPatientLocationScreenState extends State<GetPatientLocationScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late User? _user;
-  Position? _currentPosition;
-  Placemark? _currentLocationDetails;
-  late Timer _timer;
+class _GetState extends State<Get> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String? userId;
+  String? patientId;
+  Map<String, double> latLong = {};
 
   @override
   void initState() {
     super.initState();
-    _user = _auth.currentUser;
-    _startPeriodicUpdate();
+    getUserData();
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<void> getUserData() async {
     try {
-      bool locationPermissionGranted = await _handleLocationPermission();
-
-      if (!locationPermissionGranted) {
-        _showErrorDialog('Location permission not granted.');
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      Placemark place = placemarks.first;
-
-      setState(() {
-        _currentPosition = position;
-        _currentLocationDetails = place;
-      });
-
-      _updateLocationInFirestore(position, place);
-      _addCurrentLocationToFirebase(position, place);
+      userId = await _getUserIdFromFirestore();
+      patientId = await fetchData();
+      latLong = await getPatientLocation();
+      setState(() {}); // Trigger a rebuild after obtaining userId
     } catch (e) {
-      print('Error getting location: $e');
-      _showErrorDialog('Error getting location: $e');
+      print('Error getting user data: $e');
     }
   }
 
-  Future<bool> _handleLocationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
+  Future<String?> _getUserIdFromFirestore() async {
+    try {
+      String userUid = FirebaseAuth.instance.currentUser!.uid;
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userUid)
+          .get();
 
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        _showErrorDialog('Location permission not granted.');
-        return false;
+      if (userDoc.exists) {
+        return userDoc['userId']?.toString();
+      } else {
+        print('User document does not exist in Firestore.');
+        return null;
       }
-    }
-
-    return true;
-  }
-
-  void _updateLocationInFirestore(Position position, Placemark place) {
-    if (_user != null) {
-      _firestore.collection('patient_location').doc(_user!.uid).set({
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'userId': _user!.uid,
-        'timestamp': FieldValue.serverTimestamp(),
-        'country': place.country,
-        'administrativeArea': place.administrativeArea,
-        'locality': place.locality,
-        'subLocality': place.subLocality,
-      }).then((value) {
-        _showSnackbar('Location uploaded to Firestore successfully');
-      }).catchError((error) {
-        print('Error uploading location to Firestore: $error');
-        _showSnackbar('Error uploading location to Firestore');
-      });
+    } catch (e) {
+      print('Error getting user ID from Firestore: $e');
+      return null;
     }
   }
 
-  void _addCurrentLocationToFirebase(Position position, Placemark place) {
-    if (_user != null) {
-      _firestore.collection('locations').add({
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'userId': _user!.uid,
-        'timestamp': FieldValue.serverTimestamp(),
-        'country': place.country,
-        'administrativeArea': place.administrativeArea,
-        'locality': place.locality,
-        'subLocality': place.subLocality,
-      }).then((value) {
-        _showSnackbar('Location added to Firebase successfully');
-      }).catchError((error) {
-        print('Error adding location to Firebase: $error');
-        _showSnackbar('Error adding location to Firebase');
-      });
+  // with help of this class i get the patient id which are in relation with the corresponding caregiver.
+
+  Future<String?> fetchData() async {
+    try {
+      DocumentSnapshot relationshipDoc = await FirebaseFirestore.instance
+          .collection('relationships')
+          .doc(userId)
+          .get();
+
+      String? patientId =
+          relationshipDoc.exists ? relationshipDoc.get('patientId') : null;
+
+      if (patientId != null) {
+        print('Patient ID: $patientId');
+        // Perform any actions with the patientId
+        return patientId;
+      } else {
+        print('Patient ID not found for the caregiver.');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
     }
+    return null;
   }
 
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.yellow,
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
+  ///..............
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  Future<Map<String, double>> getPatientLocation() async {
+    try {
+      DocumentSnapshot locationDoc = await FirebaseFirestore.instance
+          .collection('patient_location')
+          .doc(patientId)
+          .get();
 
-  void _startPeriodicUpdate() {
-    _getCurrentLocation(); // Initial update
-    _timer = Timer.periodic(const Duration(minutes: 10), (Timer timer) {
-      _getCurrentLocation(); // Periodic update
-    });
+      if (locationDoc.exists) {
+        double latitude = locationDoc.get('latitude');
+        double longitude = locationDoc.get('longitude');
+
+        return {'latitude': latitude, 'longitude': longitude};
+      } else {
+        print('Patient location not found for the given patientId.');
+        return {};
+      }
+    } catch (e) {
+      print('Error fetching patient location: $e');
+      return {};
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(
-          0xffD9D9D9,
+      resizeToAvoidBottomInset: false,
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(
+            latLong['latitude']!,
+            latLong['longitude']!,
+          ),
+          zoom: 14.0,
         ),
-        centerTitle: true,
-        title: Text(
-          'Patient Current Location',
-          style: headingTextStyling,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 0,
+        onMapCreated: (GoogleMapController controller) {
+          controller = controller;
+        },
+        markers: {
+          Marker(
+            markerId: const MarkerId('marker_1'),
+            position: LatLng(
+              latLong['latitude']!,
+              latLong['longitude']!,
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Card(
-                elevation: 2,
-                child: Image(
-                  fit: BoxFit.fill,
-                  height: 350,
-                  width: double.infinity,
-                  image: AssetImage(
-                    'assets/googlemapimage.png',
-                  ),
-                ),
-              ),
+            infoWindow: const InfoWindow(
+              snippet: 'Patient Location',
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            if (_currentPosition != null)
-              Container(
-                height: 100,
-                width: 340,
-                decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
-                  borderRadius: BorderRadius.circular(
-                    15,
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Patient Coordinates',
-                        style: headingTextStyling,
-                      ),
-                      Text(
-                        'Latitude       &    Longnitude\n${_currentPosition!.latitude}  ||   ${_currentPosition!.longitude}',
-                        style: textStyling,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            const SizedBox(
-              height: 10,
-            ),
-            if (_currentLocationDetails != null)
-              Container(
-                height: 150,
-                width: 340,
-                decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
-                  borderRadius: BorderRadius.circular(
-                    15,
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Patient Location Details',
-                        style: headingTextStyling,
-                      ),
-                      Text(
-                        'Country: ${_currentLocationDetails!.country},\nProvince: ${_currentLocationDetails!.administrativeArea},\nCity: ${_currentLocationDetails!.locality},\nSublocality: ${_currentLocationDetails!.subLocality}',
-                        style: textStyling,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                _getCurrentLocation();
-              },
-              child: Container(
-                height: 50,
-                width: 340,
-                decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
-                  borderRadius: BorderRadius.circular(
-                    15,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Get Current Location',
-                    style: textStyling,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
   }
 }

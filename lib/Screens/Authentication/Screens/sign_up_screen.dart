@@ -113,6 +113,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   ) async {
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
+    // ref.doc(user!.uid).set({
     ref.doc(user!.uid).set({
       'userName': userName,
       'email': _emailController.text,

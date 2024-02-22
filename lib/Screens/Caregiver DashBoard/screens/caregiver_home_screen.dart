@@ -1,10 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/caregiver_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/patient_current_location_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/game_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/screen/reminder_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/widgets/reusable_button.dart';
+import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_button.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/calls_and_chats_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/check_game_result_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/get_patient_location_screen.dart';
@@ -105,7 +103,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const GetPatientLocationScreen(),
+                    builder: (context) =>
+                        const Get(), // this screen will change into patient current location screen. Later
                   ),
                 );
               },
@@ -122,9 +121,58 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 );
               },
             ),
+            ElevatedButton(
+                onPressed: getUserIdFromFirestore, child: const Text('ID'))
           ],
         ),
       ),
     );
+  }
+
+  // this code is use for getting userId // practice purpose.
+  void showUserUid() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    String? userUid = auth.currentUser?.uid;
+
+    if (userUid != null) {
+      print('User UID: $userUid');
+      // You can display the UID in your UI or perform any other action with it.
+    } else {
+      print('User UID not available. User may not be logged in.');
+      // Handle the case where the user is not logged in.
+    }
+  }
+
+  Future<String?> getUserIdFromFirestore() async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      String userUid = auth.currentUser!.uid;
+
+      // Access Firestore and get the user document
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userUid)
+          .get();
+
+      // Check if the document exists
+      if (userDoc.exists) {
+        // Access the 'userId' field from the document
+        String? userId = userDoc['userId'];
+
+        if (userId != null) {
+          print('User ID from Firestore: $userId');
+          return userId;
+        } else {
+          print('User ID not found in Firestore document.');
+          return null;
+        }
+      } else {
+        print('User document does not exist in Firestore.');
+        return null;
+      }
+    } catch (e) {
+      print('Error getting user ID from Firestore: $e');
+      return null;
+    }
   }
 }

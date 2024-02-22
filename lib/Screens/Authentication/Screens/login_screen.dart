@@ -8,7 +8,7 @@ import 'package:mentor/Screens/Authentication/Screens/forgot_password_screen.dar
 import 'package:mentor/Screens/Authentication/Screens/sign_up_screen.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
 
-import 'package:mentor/Screens/Caregiver%20DashBoard/User%20Dashboard/caregiver_relationship_screen.dart';
+import 'package:mentor/Screens/User%20Dashboard/caregiver_relationship_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
