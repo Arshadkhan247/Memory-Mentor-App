@@ -211,6 +211,7 @@ class RelationshipService {
       // Use caregiverId as the document name
       await _firestore.collection('relationships').doc(caregiverId).set({
         'patientId': patientId,
+        'caregiverId': caregiverId,
       });
 
       print('Relationship created successfully!');

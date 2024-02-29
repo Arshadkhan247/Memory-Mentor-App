@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_button.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/calls_and_chats_screen.dart';
+import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_calls_and_chats_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/check_game_result_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/get_patient_location_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/set_reminder_screen.dart';
@@ -116,7 +116,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const CaregiverCallsAndChatsScreen(),
+                    builder: (context) => const CaregiverCallsAndChatsScreen(
+                        otherUserUid: "WUs3HHnAeTa55L2DPJCUz85ImaL2"),
                   ),
                 );
               },
