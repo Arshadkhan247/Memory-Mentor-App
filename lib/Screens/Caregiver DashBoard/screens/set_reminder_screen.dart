@@ -1,22 +1,116 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import the Firestore library
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mentor/Screens/Patient%20Dashboard/helper/text_styling.dart';
 
 class SetReminderScreen extends StatefulWidget {
-  const SetReminderScreen({super.key});
+  const SetReminderScreen({Key? key}) : super(key: key);
 
   @override
   State<SetReminderScreen> createState() => _SetReminderScreenState();
 }
 
 class _SetReminderScreenState extends State<SetReminderScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  String? userId;
+  String? caregiverId;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    try {
+      userId = await _getUserIdFromFirestore();
+      caregiverId = await fetchData();
+      setState(() {}); // Trigger a rebuild after obtaining userId
+    } catch (e) {
+      print('Error getting user data: $e');
+    }
+  }
+
+  Future<String?> _getUserIdFromFirestore() async {
+    try {
+      String userUid = FirebaseAuth.instance.currentUser!.uid;
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userUid)
+          .get();
+
+      if (userDoc.exists) {
+        return userDoc['userId']?.toString();
+      } else {
+        print('User document does not exist in Firestore.');
+        return null;
+      }
+    } catch (e) {
+      print('Error getting user ID from Firestore: $e');
+      return null;
+    }
+  }
+
+  // with help of this class i get the patient id which are in relation with the corresponding caregiver.
+
+  Future<String?> fetchData() async {
+    try {
+      DocumentSnapshot relationshipDoc = await FirebaseFirestore.instance
+          .collection('relationships')
+          .doc(userId)
+          .get();
+
+      String? caregiverId =
+          relationshipDoc.exists ? relationshipDoc.get('caregiverId') : null;
+
+      if (caregiverId != null) {
+        print('Caregiver ID: $caregiverId');
+        // Perform any actions with the patientId
+        return caregiverId;
+      } else {
+        print('Caregiver ID not found for the Patient.');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+    return null;
+  }
+
+  // Function to upload reminder to Firebase
+  Future<void> _uploadReminder(String title, String description) async {
+    try {
+      // Check if caregiverId is available
+      if (caregiverId!.isNotEmpty) {
+        // Replace 'reminders' with your actual reminders collection
+        await _firestore.collection('reminders').doc(caregiverId).set({
+          'caregiverId': caregiverId,
+          'title': title,
+          'description': description,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        print('Reminder uploaded successfully!');
+      } else {
+        print('CaregiverId is empty. Cannot upload reminder.');
+      }
+    } catch (e) {
+      print('Error uploading reminder: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(
-          0xffD9D9D9,
-        ),
+        backgroundColor: const Color(0xffD9D9D9),
         centerTitle: true,
         title: Text(
           'Set-Reminder',
@@ -28,16 +122,16 @@ class _SetReminderScreenState extends State<SetReminderScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-              height: 30,
+              height: 20,
             ),
             Text(
-              'Add Title',
+              'Title',
               style: headingTextStyling,
             ),
             Container(
@@ -55,66 +149,80 @@ class _SetReminderScreenState extends State<SetReminderScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: TextFormField(
+                  controller: titleController, // Assign the controller
                   decoration: const InputDecoration(
-                    border: InputBorder.none, // Removes the underline
+                    border: InputBorder.none,
                   ),
                 ),
               ),
             ),
             const SizedBox(
-              height: 30,
+              height: 20,
             ),
             Text(
-              'Add Description',
+              'Description',
               style: headingTextStyling,
             ),
-            Container(
-              height: 100,
-              width: 320,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
-                ),
-                color: const Color(0xffD9D9D9),
-                borderRadius: BorderRadius.circular(
-                  10,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    border: InputBorder.none, // Removes the underline
-                    hintText: 'Enter Your Message',
+            IntrinsicWidth(
+              child: Container(
+                height: 100,
+                width: 320,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.grey,
+                  ),
+                  color: const Color(0xffD9D9D9),
+                  borderRadius: BorderRadius.circular(
+                    10,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Image(
-              image: AssetImage(
-                'assets/calendar.png',
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: TextFormField(
+                    controller: descriptionController, // Assign the controller
+                    maxLines: null, // Set maxLines to null to make it multiline
+                    decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Enter Your Message',
+                        hintStyle: TextStyle(
+                            fontWeight: FontWeight.w400, fontSize: 15)),
+                  ),
+                ),
               ),
             ),
             const SizedBox(
               height: 20,
             ),
             Center(
-              child: Container(
-                height: 65,
-                width: 280,
-                decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
-                  borderRadius: BorderRadius.circular(
-                    15,
+              child: GestureDetector(
+                onTap: () async {
+                  await _uploadReminder(
+                      titleController.text, descriptionController.text);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Reminder uploaded successfully!'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+
+                  setState(() {
+                    titleController.clear();
+                    descriptionController.clear();
+                  });
+                },
+                child: Container(
+                  height: 65,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: const Color(0xffD9D9D9),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Submit',
-                    style: headingTextStyling,
+                  child: Center(
+                    child: Text(
+                      'Submit',
+                      style: headingTextStyling,
+                    ),
                   ),
                 ),
               ),
@@ -125,6 +233,8 @@ class _SetReminderScreenState extends State<SetReminderScreen> {
     );
   }
 }
+
+
 
 // import 'package:flutter/material.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
