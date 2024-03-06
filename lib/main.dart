@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mentor/Database/firebase_options.dart';
 import 'package:mentor/Screens/Authentication/Screens/welcomeScreen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_home_screen.dart';
-import 'package:mentor/Screens/User%20Dashboard/screen/patient_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/User%20Dashboard/screen/patient_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

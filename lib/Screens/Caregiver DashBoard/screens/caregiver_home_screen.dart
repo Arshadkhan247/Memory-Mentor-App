@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/User%20Dashboard/widgets/reusable_button.dart';
+import 'package:mentor/Screens/Patient%20Dashboard/widgets/reusable_button.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/caregiver_calls_and_chats_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/check_game_result_screen.dart';
 import 'package:mentor/Screens/Caregiver%20DashBoard/screens/get_patient_location_screen.dart';
@@ -16,6 +16,73 @@ class CaregiverHomeScreen extends StatefulWidget {
 }
 
 class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
+  String? userId;
+  String? patientId;
+  Map<String, double> latLong = {};
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    try {
+      userId = await _getUserIdFromFirestore();
+      patientId = await fetchData();
+      setState(() {}); // Trigger a rebuild after obtaining userId
+    } catch (e) {
+      print('Error getting user data: $e');
+    }
+  }
+
+  Future<String?> _getUserIdFromFirestore() async {
+    try {
+      String userUid = FirebaseAuth.instance.currentUser!.uid;
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userUid)
+          .get();
+
+      if (userDoc.exists) {
+        return userDoc['userId']?.toString();
+      } else {
+        print('User document does not exist in Firestore.');
+        return null;
+      }
+    } catch (e) {
+      print('Error getting user ID from Firestore: $e');
+      return null;
+    }
+  }
+
+  // with help of this class i get the patient id which are in relation with the corresponding caregiver.
+
+  Future<String?> fetchData() async {
+    try {
+      DocumentSnapshot relationshipDoc = await FirebaseFirestore.instance
+          .collection('relationships')
+          .doc(userId)
+          .get();
+
+      String? patientId =
+          relationshipDoc.exists ? relationshipDoc.get('patientId') : null;
+
+      if (patientId != null) {
+        print('Patient ID: $patientId');
+        // Perform any actions with the patientId
+        return patientId;
+      } else {
+        print('Patient ID not found for the caregiver.');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+    return null;
+  }
+
+  ///..............
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,8 +183,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const CaregiverCallsAndChatsScreen(
-                        otherUserUid: "WUs3HHnAeTa55L2DPJCUz85ImaL2"),
+                    builder: (context) => CaregiverCallsAndChatsScreen(
+                        otherUserUid: patientId.toString()),
                   ),
                 );
               },

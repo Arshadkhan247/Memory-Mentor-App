@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mentor/Screens/User%20Dashboard/helper/text_styling.dart';
+import 'package:mentor/Screens/Patient%20Dashboard/helper/text_styling.dart';
 
 class PatientCurrentLocationScreen extends StatefulWidget {
   const PatientCurrentLocationScreen({Key? key}) : super(key: key);

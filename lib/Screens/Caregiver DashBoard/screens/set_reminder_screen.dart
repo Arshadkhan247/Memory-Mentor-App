@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mentor/Screens/User%20Dashboard/helper/text_styling.dart';
+import 'package:mentor/Screens/Patient%20Dashboard/helper/text_styling.dart';
 
 class SetReminderScreen extends StatefulWidget {
   const SetReminderScreen({super.key});

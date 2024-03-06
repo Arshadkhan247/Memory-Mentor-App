@@ -1,11 +1,13 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
-import 'package:mentor/Screens/User%20Dashboard/screen/patient_home_screen.dart';
+import 'package:mentor/Screens/Patient%20Dashboard/screen/patient_home_screen.dart';
 
 class CaregiverRelationScreen extends StatefulWidget {
   const CaregiverRelationScreen({Key? key}) : super(key: key);
@@ -56,12 +58,18 @@ class _CaregiverRelationScreenState extends State<CaregiverRelationScreen> {
           );
         });
       } else {
-        print('Invalid caregiver ID. Please enter a valid ID.');
+        log('Invalid caregiver ID. Please enter a valid ID.' as num).toString();
         // Add logic to show an error message to the user
       }
     } else {
       print('Invalid caregiver ID. Please enter a valid ID.');
       // Add logic to show an error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid caregiver ID. Please enter a valid ID.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
