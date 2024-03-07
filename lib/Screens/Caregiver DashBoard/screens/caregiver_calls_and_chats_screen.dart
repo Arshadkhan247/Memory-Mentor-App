@@ -24,6 +24,7 @@ class _PatientCallsAndChatsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.red,
         title: const Text('Chat'),
       ),
       body: Padding(
@@ -190,7 +191,7 @@ class MessageWidget extends StatelessWidget {
     } else if (timestamp.isAfter(yesterday)) {
       return 'Yesterday ${DateFormat.jm().format(timestamp.toLocal())}';
     } else {
-      return DateFormat('MMMM d, yyyy ${DateFormat.jm().pattern}')
+      return DateFormat('MMMM d,${DateFormat.jm().pattern}')
           .format(timestamp.toLocal());
     }
   }
