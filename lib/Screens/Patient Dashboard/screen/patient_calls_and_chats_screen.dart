@@ -26,63 +26,74 @@
 //       appBar: AppBar(
 //         title: const Text('Chat'),
 //       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(3.0),
-//         child: Column(
-//           children: [
-//             Expanded(
-//               child: StreamBuilder<QuerySnapshot>(
-//                 stream: _firestore
-//                     .collection('messages')
-//                     .where('users', arrayContainsAny: [
-//                       _auth.currentUser?.uid,
-//                       widget.otherUserUid
-//                     ])
-//                     .orderBy('timestamp', descending: true)
-//                     .snapshots(),
-//                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return const Center(child: CircularProgressIndicator());
-//                   }
+//       body: Stack(
+//         children: [
+//           // Background Image
+//           Image.asset(
+//             'assets/chatBack.jpg',
+//             fit: BoxFit.cover,
+//             width: double.infinity,
+//             height: double.infinity,
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Column(
+//               children: [
+//                 Expanded(
+//                   child: StreamBuilder<QuerySnapshot>(
+//                     stream: _firestore
+//                         .collection('messages')
+//                         .where('users', arrayContainsAny: [
+//                           _auth.currentUser?.uid,
+//                           widget.otherUserUid
+//                         ])
+//                         .orderBy('timestamp', descending: true)
+//                         .snapshots(),
+//                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                       if (snapshot.connectionState == ConnectionState.waiting) {
+//                         return const Center(child: CircularProgressIndicator());
+//                       }
 
-//                   if (snapshot.hasError) {
-//                     return Center(
-//                       child: Text('Error: ${snapshot.error}'),
-//                     );
-//                   }
+//                       if (snapshot.hasError) {
+//                         return Center(
+//                           child: Text('Error: ${snapshot.error}'),
+//                         );
+//                       }
 
-//                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-//                     return const Center(
-//                       child: Text("No messages"),
-//                     );
-//                   }
+//                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+//                         return const Center(
+//                           child: Text("No messages"),
+//                         );
+//                       }
 
-//                   final messageDocs = snapshot.data!.docs;
+//                       final messageDocs = snapshot.data!.docs;
 
-//                   return ListView.builder(
-//                     reverse: true,
-//                     itemCount: messageDocs.length,
-//                     itemBuilder: (context, index) {
-//                       final message =
-//                           messageDocs[index].data() as Map<String, dynamic>;
-//                       final messageText = message['text'] as String?;
-//                       final messageSender = message['sender'] as String?;
-//                       final timestamp = message['timestamp'] as Timestamp?;
+//                       return ListView.builder(
+//                         reverse: true,
+//                         itemCount: messageDocs.length,
+//                         itemBuilder: (context, index) {
+//                           final message =
+//                               messageDocs[index].data() as Map<String, dynamic>;
+//                           final messageText = message['text'] as String?;
+//                           final messageSender = message['sender'] as String?;
+//                           final timestamp = message['timestamp'] as Timestamp?;
 
-//                       return MessageWidget(
-//                         sender: messageSender ?? '',
-//                         text: messageText ?? '',
-//                         isMe: _auth.currentUser?.uid == messageSender,
-//                         timestamp: timestamp?.toDate() ?? DateTime.now(),
+//                           return MessageWidget(
+//                             sender: messageSender ?? '',
+//                             text: messageText ?? '',
+//                             isMe: _auth.currentUser?.uid == messageSender,
+//                             timestamp: timestamp?.toDate() ?? DateTime.now(),
+//                           );
+//                         },
 //                       );
 //                     },
-//                   );
-//                 },
-//               ),
+//                   ),
+//                 ),
+//                 _buildMessageComposer(),
+//               ],
 //             ),
-//             _buildMessageComposer(),
-//           ],
-//         ),
+//           ),
+//         ],
 //       ),
 //     );
 //   }
@@ -195,18 +206,13 @@
 //     }
 //   }
 // }
-
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
 class PatientCallsAndChatsScreen extends StatefulWidget {
-  final String otherUserUid; // UID of the other user (patient or caregiver)
+  final String otherUserUid;
 
   const PatientCallsAndChatsScreen({Key? key, required this.otherUserUid})
       : super(key: key);
@@ -221,75 +227,86 @@ class _PatientCallsAndChatsScreenState
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
-  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.teal,
         title: const Text('Chat'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore
-                    .collection('messages')
-                    .where('users', arrayContainsAny: [
-                      _auth.currentUser?.uid,
-                      widget.otherUserUid
-                    ])
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+      body: Stack(
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/chatBack.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _firestore
+                        .collection('messages')
+                        .where('users', arrayContainsAny: [
+                          _auth.currentUser?.uid,
+                          widget.otherUserUid
+                        ])
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                      child: Text("No messages"),
-                    );
-                  }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text("No messages"),
+                        );
+                      }
 
-                  final messageDocs = snapshot.data!.docs;
+                      final messageDocs = snapshot.data!.docs;
 
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: messageDocs.length,
-                    itemBuilder: (context, index) {
-                      final message =
-                          messageDocs[index].data() as Map<String, dynamic>;
-                      final messageText = message['text'] as String?;
-                      final messageSender = message['sender'] as String?;
-                      final messageType = message['type'] as String?;
-                      final fileUrl = message['fileUrl'] as String?;
-                      final timestamp = message['timestamp'] as Timestamp?;
+                      return ListView.builder(
+                        reverse: true,
+                        itemCount: messageDocs.length,
+                        itemBuilder: (context, index) {
+                          final message =
+                              messageDocs[index].data() as Map<String, dynamic>;
+                          final messageText = message['text'] as String?;
+                          final messageSender = message['sender'] as String?;
+                          final timestamp = message['timestamp'] as Timestamp?;
 
-                      return MessageWidget(
-                        sender: messageSender ?? '',
-                        text: messageText ?? '',
-                        isMe: _auth.currentUser?.uid == messageSender,
-                        timestamp: timestamp?.toDate() ?? DateTime.now(),
-                        type: messageType ?? 'text',
-                        fileUrl: fileUrl,
+                          return MessageWidget(
+                            sender: messageSender ?? '',
+                            text: messageText ?? '',
+                            isMe: _auth.currentUser?.uid == messageSender,
+                            timestamp: timestamp?.toDate() ?? DateTime.now(),
+                            onDelete: () {
+                              // Handle message deletion
+                              _deleteMessage(messageDocs[index].id);
+                            },
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+                _buildMessageComposer(),
+              ],
             ),
-            _buildMessageComposer(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -299,14 +316,17 @@ class _PatientCallsAndChatsScreenState
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.image),
-            onPressed: _pickImage,
-          ),
           Expanded(
             child: TextField(
               controller: _messageController,
               decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(
+                      14,
+                    ),
+                  ),
+                ),
                 hintText: 'Enter your message...',
               ),
             ),
@@ -315,14 +335,15 @@ class _PatientCallsAndChatsScreenState
             icon: const Icon(Icons.send),
             onPressed: () async {
               final user = _auth.currentUser;
-              if (user != null) {
-                if (_messageController.text.isNotEmpty) {
-                  await _sendMessage('text', _messageController.text);
-                } else if (_imageFile != null) {
-                  await _sendMessage('image', _imageFile!);
-                }
+              if (user != null && _messageController.text.isNotEmpty) {
+                await _firestore.collection('messages').add({
+                  'text': _messageController.text,
+                  'sender': user.uid,
+                  'receiver': widget.otherUserUid,
+                  'timestamp': FieldValue.serverTimestamp(),
+                  'users': [user.uid, widget.otherUserUid],
+                });
                 _messageController.clear();
-                _resetFileVariables();
               }
             },
           ),
@@ -331,58 +352,8 @@ class _PatientCallsAndChatsScreenState
     );
   }
 
-  File? _imageFile;
-
-  Future<void> _pickImage() async {
-    final XFile? image =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _imageFile = File(image.path);
-      });
-    }
-  }
-
-  Future<void> _sendMessage(String type, dynamic content) async {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        String caregiverId =
-            'yourCaregiverId'; // Replace with actual caregiverId
-        String patientId = 'yourPatientId'; // Replace with actual patientId
-
-        String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        Reference storageReference = FirebaseStorage.instance
-            .ref()
-            .child('files')
-            .child(caregiverId)
-            .child(patientId)
-            .child('$fileName.$type');
-
-        UploadTask uploadTask = storageReference.putFile(content);
-
-        await uploadTask.whenComplete(() async {
-          String fileUrl = await storageReference.getDownloadURL();
-
-          await _firestore.collection('messages').add({
-            'sender': user.uid,
-            'receiver': widget.otherUserUid,
-            'timestamp': FieldValue.serverTimestamp(),
-            'users': [user.uid, widget.otherUserUid],
-            'type': type,
-            'fileUrl': fileUrl,
-          });
-        });
-      }
-    } catch (e) {
-      print('Error sending message: $e');
-    }
-  }
-
-  void _resetFileVariables() {
-    setState(() {
-      _imageFile = null;
-    });
+  void _deleteMessage(String messageId) async {
+    await _firestore.collection('messages').doc(messageId).delete();
   }
 }
 
@@ -391,8 +362,7 @@ class MessageWidget extends StatelessWidget {
   final String text;
   final bool isMe;
   final DateTime timestamp;
-  final String type;
-  final String? fileUrl;
+  final VoidCallback onDelete;
 
   const MessageWidget({
     Key? key,
@@ -400,50 +370,80 @@ class MessageWidget extends StatelessWidget {
     required this.text,
     required this.isMe,
     required this.timestamp,
-    required this.type,
-    this.fileUrl,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (type == 'image') {
-      return Image.network(
-        fileUrl!,
-        width: 200.0,
-        height: 200.0,
-        fit: BoxFit.cover,
-      );
-    }
-
-    return IntrinsicWidth(
-      child: Container(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
-        decoration: BoxDecoration(
-          color: isMe ? Colors.green[100] : Colors.grey.shade400,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        padding: const EdgeInsets.all(4.0),
+    return GestureDetector(
+      onLongPress: () {
+        // Show a dialog or confirmation for deleting the message
+        _showDeleteConfirmation(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16.0),
-            ),
-            const SizedBox(height: 4.0),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                _formatTimestamp(timestamp),
-                style: const TextStyle(
-                  fontSize: 11.0,
-                  color: Colors.black54,
+            IntrinsicWidth(
+              child: Container(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.85),
+                decoration: BoxDecoration(
+                  color: isMe ? Colors.green[100] : Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      text,
+                      style: const TextStyle(fontSize: 16.0),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        _formatTimestamp(timestamp),
+                        style: const TextStyle(
+                          fontSize: 11.0,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            )
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Message'),
+        content: const Text('Are you sure you want to delete this message?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              onDelete(); // Trigger the onDelete callback
+              Navigator.of(context).pop();
+            },
+            child: const Text('Delete'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
     );
   }
@@ -458,7 +458,7 @@ class MessageWidget extends StatelessWidget {
     } else if (timestamp.isAfter(yesterday)) {
       return 'Yesterday ${DateFormat.jm().format(timestamp.toLocal())}';
     } else {
-      return DateFormat('MMMM d, yyyy ${DateFormat.jm().pattern}')
+      return DateFormat('${DateFormat.jm().pattern}')
           .format(timestamp.toLocal());
     }
   }
