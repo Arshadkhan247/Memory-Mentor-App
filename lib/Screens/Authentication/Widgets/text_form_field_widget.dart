@@ -39,7 +39,7 @@ class TextFormFieldWidget extends StatelessWidget {
           fieldName,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF345FB4),
+            color: Color.fromARGB(255, 38, 142, 226),
           ),
         ),
       ),

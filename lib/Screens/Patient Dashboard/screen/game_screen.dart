@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mentor/Screens/Patient%20Dashboard/screen/game/crossword_game_screen.dart';
 import 'package:mentor/Screens/Patient%20Dashboard/widgets/reusable_button.dart';
 
 class GameScreen extends StatefulWidget {
@@ -14,21 +14,19 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(
-          0xffD9D9D9,
-        ),
+        backgroundColor: Colors.blue,
         centerTitle: true,
-        title: Text(
-          'Cross-Word Game',
-          style: GoogleFonts.aBeeZee(
-            fontSize: 13,
-            letterSpacing: 2,
-            color: Colors.black,
+        title: const Text(
+          'Games Screen',
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white,
           ),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -66,22 +64,26 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
             const SizedBox(
-              height: 60,
+              height: 10,
             ),
-            ResuableButtonWidget(
+            ReusableButtonWidget(
               name: 'Play Game',
-              imageUrl: 'assets/playicon.png',
+              icon: Icons.play_circle_fill,
               onTap: () {
                 // this widget is design to move to play the game.
+
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const CrosswordGameScreen()));
               },
             ),
             const SizedBox(
               height: 14,
             ),
-            ResuableButtonWidget(
-                name: 'Score Record',
-                imageUrl: 'assets/recordicon.png',
-                onTap: () {})
+            ReusableButtonWidget(
+              name: 'Score Record',
+              icon: Icons.save_alt,
+              onTap: () {},
+            )
           ],
         ),
       ),

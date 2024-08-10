@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mentor/Screens/Patient%20Dashboard/helper/text_styling.dart';
 
 class PatientCurrentLocationScreen extends StatefulWidget {
-  const PatientCurrentLocationScreen({Key? key}) : super(key: key);
+  PatientCurrentLocationScreen({super.key, required this.caregiverId});
+
+  String? caregiverId;
 
   @override
   _PatientCurrentLocationScreenState createState() =>
@@ -82,7 +83,7 @@ class _PatientCurrentLocationScreenState
 
   void _updateLocationInFirestore(Position position, Placemark place) {
     if (_user != null) {
-      _firestore.collection('patient_location').doc(_user!.uid).set({
+      _firestore.collection('patient_location').doc(widget.caregiverId).set({
         'latitude': position.latitude,
         'longitude': position.longitude,
         'userId': _user!.uid,
@@ -144,14 +145,14 @@ class _PatientCurrentLocationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(
-          0xffD9D9D9,
-        ),
+        backgroundColor: Colors.blue,
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Your Current Location',
-          style: headingTextStyling,
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.w400, color: Colors.white),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -182,8 +183,9 @@ class _PatientCurrentLocationScreenState
                     },
                   )
                 : const Center(
-                    child:
-                        CircularProgressIndicator(), // or any other loading indicator
+                    child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    ), // or any other loading indicator
                   ),
           ),
         ],

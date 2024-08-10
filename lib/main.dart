@@ -3,10 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mentor/Database/firebase_options.dart';
-import 'package:mentor/Screens/Authentication/Screens/welcomeScreen.dart';
-import 'package:mentor/Screens/Caregiver%20DashBoard/screens/set_reminder_screen.dart';
-import 'package:mentor/Screens/Patient%20Dashboard/screen/patient_calls_and_chats_screen.dart';
-import 'package:mentor/Screens/Patient%20Dashboard/screen/reminder_screen.dart';
+import 'package:mentor/Screens/Authentication/Screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,21 +19,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'MemoryMentorApp',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: ('roboto'),
-        useMaterial3: true,
-      ),
-      // home: const CaregiverCallsAndChatsScreen(
-      //   otherUserUid: "WUs3HHnAeTa55L2DPJCUz85ImaL2",
-      // ),
+        debugShowCheckedModeBanner: false,
+        title: 'MemoryMentorApp',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: ('roboto'),
+          useMaterial3: true,
+        ),
 
-      // home: const PatientCallsAndChatsScreen(otherUserUid: "857"),
-      home: const PatientCallsAndChatsScreen(
-        otherUserUid: '857',
-      ),
-    );
+        // home: const PatientCallsAndChatsScreen(otherUserUid: "857"),
+        home: const SplashScreen());
   }
 }

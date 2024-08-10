@@ -1,3 +1,251 @@
+// // ignore_for_file: use_build_context_synchronously
+
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+// import 'package:loading_indicator/loading_indicator.dart';
+// import 'package:mentor/Screens/Authentication/Screens/login_screen.dart';
+// import 'package:mentor/Screens/Authentication/Widgets/text_form_field_widget.dart';
+
+// class ForgotPasswordScreen extends StatefulWidget {
+//   const ForgotPasswordScreen({super.key});
+
+//   @override
+//   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+// }
+
+// class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+//   final FirebaseAuth _auth = FirebaseAuth.instance;
+//   final TextEditingController _emailController = TextEditingController();
+//   bool _isLoading = false;
+//   //  Variable that are required inside, for UI Logic.
+//   bool isEmailFilled = false;
+//   bool _isValidEmailAddress = false;
+
+//   // this function help us to reset the password using link.
+//   Future<void> _resetPassword() async {
+//     try {
+//       setState(() {
+//         _isLoading = true;
+//       });
+
+//       // Validate the email field
+//       if (_emailController.text.isEmpty) {
+//         throw Exception('Please enter your email address.');
+//       }
+
+//       // Send a password reset email
+//       await _auth.sendPasswordResetEmail(email: _emailController.text);
+
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) => const LoginScreen(),
+//         ),
+//       );
+
+//       // Show a success message or navigate to a success screen
+//       _showSuccessDialog();
+//     } on FirebaseAuthException catch (e) {
+//       setState(() {
+//         _isLoading = false;
+//       });
+
+//       String errorMessage = 'An error occurred while resetting your password.';
+
+//       switch (e.code) {
+//         case 'invalid-email':
+//           errorMessage = 'The email address is not valid.';
+//           break;
+//         case 'user-not-found':
+//           errorMessage = 'No user found for this email address.';
+//           break;
+//         default:
+//           errorMessage = e.message ?? errorMessage;
+//       }
+
+//       _showErrorDialog(errorMessage);
+//     } catch (e) {
+//       setState(() {
+//         _isLoading = false;
+//       });
+
+//       _showErrorDialog('An unexpected error occurred: $e');
+//     }
+//   }
+
+//   // this function is used to validate Your Email on the bases of Given Pattran.
+//   bool _isValidEmail(String email) {
+//     String pattern = r'^[\w-]+(\.[\w-]+)*@gmail\.com$';
+//     RegExp regExp = RegExp(pattern);
+//     return regExp.hasMatch(email);
+//   }
+
+//   void _showSuccessDialog() {
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: const Text('Password Reset Email Sent'),
+//           content: const Text(
+//               'A password reset email has been sent to your email address. Please follow the instructions in the email to reset your password.'),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text('OK'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   void _showErrorDialog(String message) {
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: const Text('Error'),
+//           content: Text(message),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text('OK'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () {
+//         FocusScope.of(context).unfocus();
+//       },
+//       child: Scaffold(
+//         resizeToAvoidBottomInset: false,
+//         body: Stack(
+//           children: [
+//             Container(
+//               height: double.infinity,
+//               width: double.infinity,
+//               decoration: const BoxDecoration(
+//                 gradient: LinearGradient(colors: [
+//                   Color(0xFF6789CA),
+//                   Color(0xff281537),
+//                 ]),
+//               ),
+//               child: const Padding(
+//                 padding: EdgeInsets.only(top: 60.0, left: 22),
+//                 child: Text(
+//                   'Reset\nPassword!',
+//                   style: TextStyle(
+//                       fontSize: 30,
+//                       color: Colors.white,
+//                       fontWeight: FontWeight.bold),
+//                 ),
+//               ),
+//             ),
+//             Padding(
+//               padding: const EdgeInsets.only(top: 200.0),
+//               child: Center(
+//                 child: Container(
+//                   constraints:
+//                       const BoxConstraints(minWidth: 300, maxWidth: 600),
+//                   decoration: const BoxDecoration(
+//                     borderRadius: BorderRadius.only(
+//                         topLeft: Radius.circular(40),
+//                         topRight: Radius.circular(40)),
+//                     color: Colors.white,
+//                   ),
+//                   height: double.infinity,
+//                   width: double.infinity,
+//                   child: Padding(
+//                     padding: const EdgeInsets.only(left: 18.0, right: 18),
+//                     child: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         TextFormFieldWidget(
+//                             controller: _emailController,
+//                             keyboardType: TextInputType.emailAddress,
+//                             onChanged: (value) {
+//                               setState(() {
+//                                 isEmailFilled = value.isNotEmpty;
+//                                 _isValidEmailAddress =
+//                                     _isValidEmail(_emailController.text);
+//                               });
+//                             },
+//                             suffixIcon: Icon(Icons.check,
+//                                 color: _isValidEmailAddress
+//                                     ? Colors.green
+//                                     : Colors.grey),
+//                             fieldName: 'Email',
+//                             obscureText: false),
+//                         const SizedBox(
+//                           height: 15,
+//                         ),
+//                         const SizedBox(
+//                           height: 30,
+//                         ),
+//                         GestureDetector(
+//                           onTap: _resetPassword,
+//                           child: Container(
+//                             height: 55,
+//                             width: 300,
+//                             decoration: BoxDecoration(
+//                               borderRadius: BorderRadius.circular(30),
+//                               gradient: const LinearGradient(colors: [
+//                                 // Color(0xffB81736),
+//                                 // Color(0xff281537),
+//                                 Color(0xFF6789CA),
+//                                 Color(0xff281537),
+//                               ]),
+//                             ),
+//                             child: _isLoading
+//                                 ? const Center(
+//                                     child: Padding(
+//                                       padding: EdgeInsets.all(8.0),
+//                                       child: LoadingIndicator(
+//                                         // this is package to show loading indicator when submitt is loading.
+//                                         indicatorType: Indicator.lineScale,
+//                                         colors: [Colors.white],
+//                                         strokeWidth: 0.5,
+//                                         backgroundColor: Colors.transparent,
+//                                       ),
+//                                     ),
+//                                   )
+//                                 : const Center(
+//                                     child: Text(
+//                                       'Confirm',
+//                                       style: TextStyle(
+//                                           fontWeight: FontWeight.bold,
+//                                           fontSize: 20,
+//                                           color: Colors.white),
+//                                     ),
+//                                   ),
+//                           ),
+//                         ),
+//                         const SizedBox(
+//                           height: 30,
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -69,7 +317,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _isLoading = false;
       });
 
-      _showErrorDialog('An unexpected error occurred: $e');
+      _showErrorDialog('$e\n');
     }
   }
 
@@ -135,19 +383,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               height: double.infinity,
               width: double.infinity,
               decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  Color(0xFF6789CA),
-                  Color(0xff281537),
-                ]),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 38, 142, 226),
+                    Colors.white,
+                  ],
+                ),
               ),
               child: const Padding(
                 padding: EdgeInsets.only(top: 60.0, left: 22),
                 child: Text(
                   'Reset\nPassword!',
                   style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -159,8 +412,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       const BoxConstraints(minWidth: 300, maxWidth: 600),
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(40),
-                        topRight: Radius.circular(40)),
+                      topLeft: Radius.circular(40),
+                      topRight: Radius.circular(40),
+                    ),
                     color: Colors.white,
                   ),
                   height: double.infinity,
@@ -171,23 +425,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextFormFieldWidget(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            onChanged: (value) {
-                              setState(() {
-                                isEmailFilled = value.isNotEmpty;
-                                _isValidEmailAddress =
-                                    _isValidEmail(_emailController.text);
-                              });
-                            },
-                            suffixIcon: Icon(Icons.check,
-                                color: _isValidEmailAddress
-                                    ? Colors.green
-                                    : Colors.grey),
-                            fieldName: 'Email',
-                            obscureText: false),
-                        const SizedBox(
-                          height: 15,
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) {
+                            setState(() {
+                              isEmailFilled = value.isNotEmpty;
+                              _isValidEmailAddress =
+                                  _isValidEmail(_emailController.text);
+                            });
+                          },
+                          suffixIcon: Icon(
+                            Icons.check,
+                            color: _isValidEmailAddress
+                                ? Colors.green
+                                : Colors.grey,
+                          ),
+                          fieldName: 'Email',
+                          obscureText: false,
                         ),
                         const SizedBox(
                           height: 30,
@@ -199,12 +453,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             width: 300,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
-                              gradient: const LinearGradient(colors: [
-                                // Color(0xffB81736),
-                                // Color(0xff281537),
-                                Color(0xFF6789CA),
-                                Color(0xff281537),
-                              ]),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color.fromARGB(255, 38, 142, 226),
+                                  Color.fromARGB(255, 38, 142, 226),
+                                ],
+                              ),
                             ),
                             child: _isLoading
                                 ? const Center(
@@ -223,9 +479,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     child: Text(
                                       'Confirm',
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          color: Colors.white),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                           ),

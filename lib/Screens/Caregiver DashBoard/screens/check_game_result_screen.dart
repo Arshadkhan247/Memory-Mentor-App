@@ -14,16 +14,15 @@ class _CheckGamesResultScreenState extends State<CheckGamesResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(
-          0xffD9D9D9,
-        ),
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
         title: Text(
-          'Patient-Score',
+          'Patient Games History',
           style: GoogleFonts.aBeeZee(
             fontSize: 16,
             letterSpacing: 2,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
       ),
